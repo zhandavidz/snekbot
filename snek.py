@@ -5,11 +5,46 @@ import pygame
 # initialize pygame
 pygame.init()
 
-# set window dimensions
-screen_width = 600
-screen_height = 600
+class checker_square(object):
+    def __init__(self, coords, size):
+        self.coords = coords
+        self.size = size
 
-win = pygame.display.set_mode((screen_width, screen_height))
+    def draw(self, win):
+        pygame.draw.rect(win, (40, 40, 40), (self.coords[0], self.coords[1], self.size, self.size))
+
+
+class board(object):
+    def __init__(self, square_width, squares_wide, squares_tall, display_buffer = None):
+        self.square_width = square_width
+        self.squares_wide = squares_wide
+        self.squares_tall = squares_tall
+        if display_buffer is None:
+            self.display_buffer = square_width
+        else:
+            self.display_buffer = display_buffer
+
+        self.dimensions = (self.square_width * self.squares_wide, self.square_width * self.squares_tall + self.display_buffer)
+
+        self.checker_coords = (0, self.display_buffer)
+        self.checkers = []
+        for x_coord in range(self.checker_coords[0], self.squares_wide * self.square_width, 2 * self.square_width):
+            for y_coord in range(self.checker_coords[1], self.squares_tall * self.square_width, 2 * self.square_width):
+                self.checkers.append(checker_square((x_coord, y_coord), self.square_width))
+                self.checkers.append(checker_square((x_coord + self.square_width, y_coord + self.square_width), self.square_width))
+
+    def draw(self, win):
+        pygame.draw.rect(win, (0, 0, 0), (0, self.display_buffer, self.dimensions[0], self.dimensions[1]))
+        pygame.draw.rect(win, (0, 100, 200), (0, 0, self.dimensions[0], self.display_buffer))
+        for checker in self.checkers:
+            checker.draw(win)
+
+# initialize the board
+board = board(50, 12, 12)
+
+
+# set window dimensions
+win = pygame.display.set_mode(board.dimensions)
 
 # set the title of the window
 pygame.display.set_caption("Snekbot")
@@ -28,6 +63,9 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    # draw the board
+    board.draw(win)
 
     # refresh the window
     pygame.display.update()
