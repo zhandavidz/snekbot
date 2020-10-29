@@ -93,7 +93,7 @@ class snek(object):
 
 # initialize the board
 board = board(25, 24, 24, 50)
-snek = snek(board.checker_coords[0], board.checker_coords[1], 25)
+snek = snek(board.checker_coords[0], board.checker_coords[1], board.square_width)
 
 
 # set window dimensions
