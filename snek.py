@@ -42,10 +42,10 @@ class board(object):
         # add title
         # when display buffer = 50:
         # text = 175px, so round(3.5 * self.display_buffer)
-        x = (self.dimensions[0] - (3.5 * self.display_buffer)) // 2
+        x = round((self.dimensions[0] - (3.5 * self.display_buffer)) / 2)
         # height pretty much the size of self.display_buffer, size = 50px
         # when font size = 50, x = 30, so y = self.display_buffer * 1 // 5
-        y = self.display_buffer * 1 // 5
+        y = round(self.display_buffer / 5)
         title_font = pygame.font.SysFont("sansserif", self.display_buffer)
         title = title_font.render("SNEKBOT", 1, (255,255,255))
         win.blit(title, (x, y))
@@ -59,37 +59,92 @@ class board(object):
     def is_within_boundaries(self, x, y):
         return (0 <= x and x <= self.dimensions[0] - self.square_width) and (0 <= y and y <= self.dimensions[1] - self.square_width)
 
+    def get_pixel_of_square(self, x_index, y_index):
+        return (x_index * self.square_width, y_index * self.square_width + self.display_buffer)
+
+    def get_square_of_pixel(self, x, y):
+        return (x // self.square_width, (y - self.display_buffer) // self.square_width)
+
+
 class snek(object):
-    def __init__(self, x, y, segment_width):
-        self.length = 1
-        self.x_pixel = x
-        self.y_pixel = y
+    def __init__(self, x, y, segment_width, initial_direction = "right"):
+        self.segments = [segment(x, y, 0, 0, segment_width, initial_direction)]
+        # self.length = 1
+        # self.x_pixel = x
+        # self.y_pixel = y
         self.segment_width = segment_width
-        self.current_direction = "right"
-        self.next_direction = self.current_direction
+        # self.current_direction = "right"
+        self.next_direction = initial_direction
         self.alive = True
         self.vel = 5
 
     def switch_direction(self):
-        self.current_direction = self.next_direction
+        # print(self.next_direction)
+        # if not self.segments[0].direction == self.next_direction:
+        self.segments[0].set_direction(self.next_direction)
 
-    def draw(self, win, is_aligned, is_within_boundaries):
+    def set_direction(self, direction):
+        self.next_direction = direction
+
+    def move_segments(self):
+        # move the first one
+        self.segments[0].move(self.vel)
+        # and the last one
+        if len(self.segments) > 1:
+            self.segments[-1].move(self.vel)
+
+    def update_segments(self, x_pixel, y_pixel, get_pixel_of_square, get_square_of_pixel):
+        new_x_index, new_y_index = get_square_of_pixel(x_pixel, y_pixel)
+        for segment in self.segments:
+            new_x_index, new_y_index = segment.update(new_x_index, new_y_index, get_pixel_of_square)
+        # return True
+
+    def draw(self, win, is_aligned, is_within_boundaries, get_pixel_of_square, get_square_of_pixel):
         if self.alive:
-            if is_aligned(self.x_pixel, self.y_pixel):
+            if is_aligned(self.segments[0].x_pixel, self.segments[0].y_pixel):
                 self.switch_direction()
+                self.update_segments(self.segments[0].x_pixel, self.segments[0].y_pixel, get_pixel_of_square, get_square_of_pixel)
 
-            if self.current_direction == "right":
-                self.x_pixel += self.vel
-            elif self.current_direction == "left":
-                self.x_pixel -= self.vel
-            elif self.current_direction == "up":
-                self.y_pixel -= self.vel
-            elif self.current_direction == "down":
-                self.y_pixel += self.vel
-            if not is_within_boundaries(self.x_pixel, self.y_pixel):
+
+            if not is_within_boundaries(self.segments[0].x_pixel, self.segments[0].y_pixel):
                 self.alive = False
             else:
-                pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
+                # we do not want to draw the last one
+                for segment in self.segments:
+                    self.move_segments()
+                    segment.draw(win)
+
+class segment(object):
+    def __init__(self, x_pixel, y_pixel, x_index, y_index, size, direction):
+        self.x_pixel = x_pixel
+        self.y_pixel = y_pixel
+        self.x_index = x_index
+        self.y_index = y_index
+        self.size = size
+        self.direction = "right"
+
+    def set_direction(self, direction):
+        self.direction = direction
+
+    def move(self, vel):
+        if self.direction == "right":
+            self.x_pixel += vel
+        elif self.direction == "left":
+            self.x_pixel -= vel
+        elif self.direction == "up":
+            self.y_pixel -= vel
+        elif self.direction == "down":
+            self.y_pixel += vel
+
+    def update(self, new_x_index, new_y_index, get_pixel_of_square):
+        self.x_pixel, self.y_pixel = get_pixel_of_square(new_x_index, new_y_index)
+        old_x_index, old_y_index = self.x_index, self.y_index
+        self.x_index, self.y_index = new_x_index, new_y_index
+        return old_x_index, old_y_index
+
+    def draw(self, win):
+        # print((self.x_pixel, self.y_pixel, self.size, self.size))
+        pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.size, self.size))
 
 # initialize the board
 board = board(25, 24, 24, 50)
@@ -122,18 +177,30 @@ while run:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
-        snek.next_direction = "left"
+        print(snek.next_direction)
+        snek.set_direction("left")
+        print(snek.next_direction)
+        # print("left")
     elif keys[pygame.K_RIGHT]:
-        snek.next_direction = "right"
+        print(snek.next_direction)
+        snek.set_direction("right")
+        print(snek.next_direction)
+        # print("right")
     elif keys[pygame.K_UP]:
-        snek.next_direction = "up"
+        print(snek.next_direction)
+        snek.set_direction("up")
+        print(snek.next_direction)
+        # print("up")
     elif keys[pygame.K_DOWN]:
-        snek.next_direction = "down"
+        print(snek.next_direction)
+        snek.set_direction("down")
+        print(snek.next_direction)
+        # print("down")
 
 
     # draw the board
     board.draw(win)
-    snek.draw(win, board.is_aligned_to_grid, board.is_within_boundaries)
+    snek.draw(win, board.is_aligned_to_grid, board.is_within_boundaries, board.get_pixel_of_square, board.get_square_of_pixel)
 
     # refresh the window
     pygame.display.update()
