@@ -15,7 +15,6 @@ class checker_square(object):
 
 
 class board(object):
-
     def __init__(self, square_width, squares_wide, squares_tall, display_buffer = None):
         self.square_width = square_width # MAY NOT NEED TO BE INSTANCE VARIABLE
         self.squares_wide = squares_wide # MAY NOT NEED TO BE INSTANCE VARIABLE
@@ -27,6 +26,7 @@ class board(object):
 
         self.dimensions = (self.square_width * self.squares_wide, self.square_width * self.squares_tall + self.display_buffer)
 
+        self.checker_coords = (0, self.display_buffer)
         self.checkers = []
         for x_coord in range(0, self.squares_wide * self.square_width, 2 * self.square_width):
             for y_coord in range(self.display_buffer, self.squares_tall * self.square_width + self.display_buffer, 2 * self.square_width):
@@ -53,31 +53,41 @@ class board(object):
         for checker in self.checkers:
             checker.draw(win)
 
+    def is_aligned_to_grid(self, x, y):
+        return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0;
+
 class snek(object):
-    def __init__(self, segment_width):
+    def __init__(self, x, y, segment_width):
         self.length = 1
-        self.x_pixel = 0
-        self.y_pixel = 0
+        self.x_pixel = x
+        self.y_pixel = y
         self.segment_width = segment_width
-        self.direction = "right"
-        self.moving = True
+        self.current_direction = "right"
+        self.next_direction = self.current_direction
+        # self.moving = True
         self.vel = 5
 
-    def draw(self, win):
-        if self.moving:
-            if self.direction == "right":
-                self.x_pixel += self.vel
-            elif self.direction == "left":
-                self.x_pixel -= self.vel
-            elif self.direction == "up":
-                self.y_pixel -= self.vel
-            elif self.direction == "down":
-                self.y_pixel += self.vel
+    def switch_direction(self):
+        self.current_direction = self.next_direction
+
+    def draw(self, win, is_aligned):
+        # if self.moving:
+        if is_aligned(self.x_pixel, self.y_pixel):
+            self.switch_direction()
+
+        if self.current_direction == "right":
+            self.x_pixel += self.vel
+        elif self.current_direction == "left":
+            self.x_pixel -= self.vel
+        elif self.current_direction == "up":
+            self.y_pixel -= self.vel
+        elif self.current_direction == "down":
+            self.y_pixel += self.vel
         pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
 
 # initialize the board
 board = board(25, 24, 24, 50)
-snek = snek(25)
+snek = snek(board.checker_coords[0], board.checker_coords[1], 25)
 
 
 # set window dimensions
@@ -106,18 +116,18 @@ while run:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT]:
-        snek.direction = "left"
+        snek.next_direction = "left"
     elif keys[pygame.K_RIGHT]:
-        snek.direction = "right"
+        snek.next_direction = "right"
     elif keys[pygame.K_UP]:
-        snek.direction = "up"
+        snek.next_direction = "up"
     elif keys[pygame.K_DOWN]:
-        snek.direction = "down"
+        snek.next_direction = "down"
 
 
     # draw the board
     board.draw(win)
-    snek.draw(win)
+    snek.draw(win, board.is_aligned_to_grid)
 
     # refresh the window
     pygame.display.update()
