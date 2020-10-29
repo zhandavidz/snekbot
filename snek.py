@@ -53,8 +53,20 @@ class board(object):
         for checker in self.checkers:
             checker.draw(win)
 
+class snek(object):
+    def __init__(self, segment_width):
+        self.length = 1
+        self.x_pixel = 0
+        self.y_pixel = 0
+        self.segment_width = segment_width
+        vel = 5
+
+    def draw(self, win):
+        pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
+
 # initialize the board
 board = board(25, 24, 24, 50)
+snek = snek(25)
 
 
 # set window dimensions
@@ -82,6 +94,7 @@ while run:
 
     # draw the board
     board.draw(win)
+    snek.draw(win)
 
     # refresh the window
     pygame.display.update()
