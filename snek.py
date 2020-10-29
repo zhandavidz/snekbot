@@ -56,6 +56,9 @@ class board(object):
     def is_aligned_to_grid(self, x, y):
         return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0;
 
+    def is_within_boundaries(self, x, y):
+        return (0 <= x and x <= self.dimensions[0] - self.square_width) and (0 <= y and y <= self.dimensions[1] - self.square_width)
+
 class snek(object):
     def __init__(self, x, y, segment_width):
         self.length = 1
@@ -64,26 +67,29 @@ class snek(object):
         self.segment_width = segment_width
         self.current_direction = "right"
         self.next_direction = self.current_direction
-        # self.moving = True
+        self.alive = True
         self.vel = 5
 
     def switch_direction(self):
         self.current_direction = self.next_direction
 
-    def draw(self, win, is_aligned):
-        # if self.moving:
-        if is_aligned(self.x_pixel, self.y_pixel):
-            self.switch_direction()
+    def draw(self, win, is_aligned, is_within_boundaries):
+        if self.alive:
+            if is_aligned(self.x_pixel, self.y_pixel):
+                self.switch_direction()
 
-        if self.current_direction == "right":
-            self.x_pixel += self.vel
-        elif self.current_direction == "left":
-            self.x_pixel -= self.vel
-        elif self.current_direction == "up":
-            self.y_pixel -= self.vel
-        elif self.current_direction == "down":
-            self.y_pixel += self.vel
-        pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
+            if self.current_direction == "right":
+                self.x_pixel += self.vel
+            elif self.current_direction == "left":
+                self.x_pixel -= self.vel
+            elif self.current_direction == "up":
+                self.y_pixel -= self.vel
+            elif self.current_direction == "down":
+                self.y_pixel += self.vel
+            if not is_within_boundaries(self.x_pixel, self.y_pixel):
+                self.alive = False
+            else:
+                pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
 
 # initialize the board
 board = board(25, 24, 24, 50)
@@ -127,7 +133,7 @@ while run:
 
     # draw the board
     board.draw(win)
-    snek.draw(win, board.is_aligned_to_grid)
+    snek.draw(win, board.is_aligned_to_grid, board.is_within_boundaries)
 
     # refresh the window
     pygame.display.update()
