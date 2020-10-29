@@ -16,9 +16,9 @@ class checker_square(object):
 
 class board(object):
     def __init__(self, square_width, squares_wide, squares_tall, display_buffer = None):
-        self.square_width = square_width
-        self.squares_wide = squares_wide
-        self.squares_tall = squares_tall
+        self.square_width = square_width # MAY NOT NEED TO BE INSTANCE VARIABLE
+        self.squares_wide = squares_wide # MAY NOT NEED TO BE INSTANCE VARIABLE
+        self.squares_tall = squares_tall # MAY NOT NEED TO BE INSTANCE VARIABLE
         if display_buffer is None:
             self.display_buffer = square_width
         else:
@@ -26,10 +26,9 @@ class board(object):
 
         self.dimensions = (self.square_width * self.squares_wide, self.square_width * self.squares_tall + self.display_buffer)
 
-        self.checker_coords = (0, self.display_buffer)
         self.checkers = []
-        for x_coord in range(self.checker_coords[0], self.squares_wide * self.square_width, 2 * self.square_width):
-            for y_coord in range(self.checker_coords[1], self.squares_tall * self.square_width, 2 * self.square_width):
+        for x_coord in range(0, self.squares_wide * self.square_width, 2 * self.square_width):
+            for y_coord in range(self.display_buffer, self.squares_tall * self.square_width + self.display_buffer, 2 * self.square_width):
                 self.checkers.append(checker_square((x_coord, y_coord), self.square_width))
                 self.checkers.append(checker_square((x_coord + self.square_width, y_coord + self.square_width), self.square_width))
 
@@ -40,11 +39,12 @@ class board(object):
             checker.draw(win)
 
 # initialize the board
-board = board(50, 12, 12)
+board = board(25, 24, 24, 50)
 
 
 # set window dimensions
 win = pygame.display.set_mode(board.dimensions)
+# win = pygame.display.set_mode((700,750))
 
 # set the title of the window
 pygame.display.set_caption("Snekbot")
