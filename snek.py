@@ -15,6 +15,7 @@ class checker_square(object):
 
 
 class board(object):
+
     def __init__(self, square_width, squares_wide, squares_tall, display_buffer = None):
         self.square_width = square_width # MAY NOT NEED TO BE INSTANCE VARIABLE
         self.squares_wide = squares_wide # MAY NOT NEED TO BE INSTANCE VARIABLE
@@ -33,8 +34,22 @@ class board(object):
                 self.checkers.append(checker_square((x_coord + self.square_width, y_coord + self.square_width), self.square_width))
 
     def draw(self, win):
+        # black background
         pygame.draw.rect(win, (0, 0, 0), (0, self.display_buffer, self.dimensions[0], self.dimensions[1]))
+        # blue strip at the top
         pygame.draw.rect(win, (0, 100, 200), (0, 0, self.dimensions[0], self.display_buffer))
+
+        # add title
+        # when display buffer = 50:
+        # text = 175px, so round(3.5 * self.display_buffer)
+        x = (self.dimensions[0] - (3.5 * self.display_buffer)) // 2
+        # height pretty much the size of self.display_buffer, size = 50px
+        # when font size = 50, x = 30, so y = self.display_buffer * 1 // 5
+        y = self.display_buffer * 1 // 5
+        title_font = pygame.font.SysFont("sansserif", self.display_buffer)
+        title = title_font.render("SNEKBOT", 1, (255,255,255))
+        win.blit(title, (x, y))
+
         for checker in self.checkers:
             checker.draw(win)
 
@@ -51,6 +66,7 @@ pygame.display.set_caption("Snekbot")
 
 # set the clock used for managing fps in the main loop
 clock = pygame.time.Clock()
+
 
 
 # main loop
