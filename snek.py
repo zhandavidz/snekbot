@@ -59,9 +59,20 @@ class snek(object):
         self.x_pixel = 0
         self.y_pixel = 0
         self.segment_width = segment_width
-        vel = 5
+        self.direction = "right"
+        self.moving = True
+        self.vel = 5
 
     def draw(self, win):
+        if self.moving:
+            if self.direction == "right":
+                self.x_pixel += self.vel
+            elif self.direction == "left":
+                self.x_pixel -= self.vel
+            elif self.direction == "up":
+                self.y_pixel -= self.vel
+            elif self.direction == "down":
+                self.y_pixel += self.vel
         pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.segment_width, self.segment_width))
 
 # initialize the board
@@ -91,6 +102,18 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_LEFT]:
+        snek.direction = "left"
+    elif keys[pygame.K_RIGHT]:
+        snek.direction = "right"
+    elif keys[pygame.K_UP]:
+        snek.direction = "up"
+    elif keys[pygame.K_DOWN]:
+        snek.direction = "down"
+
 
     # draw the board
     board.draw(win)
