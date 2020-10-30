@@ -52,7 +52,7 @@ class board(object):
         return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0
 
     def is_within_boundaries(self, x, y):
-        return (0 <= x and x <= self.dimensions[0] - self.square_width) and (0 <= y and y <= self.dimensions[1] - self.square_width)
+        return (0 <= x and x <= self.dimensions[0] - self.square_width) and (self.display_buffer <= y and y <= self.dimensions[1] - self.square_width)
 
     def get_pixel_of_square(self, x_index, y_index):
         return (x_index * self.square_width, y_index * self.square_width + self.display_buffer)
