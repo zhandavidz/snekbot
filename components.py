@@ -49,7 +49,7 @@ class board(object):
             checker.draw(win)
 
     def is_aligned_to_grid(self, x, y):
-        return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0;
+        return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0
 
     def is_within_boundaries(self, x, y):
         return (0 <= x and x <= self.dimensions[0] - self.square_width) and (0 <= y and y <= self.dimensions[1] - self.square_width)
