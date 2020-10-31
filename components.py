@@ -1,4 +1,5 @@
 import pygame
+import random as r
 
 class checker_square(object):
     def __init__(self, coords, size):
@@ -21,7 +22,7 @@ class board(object):
 
         self.dimensions = (self.square_width * self.squares_wide, self.square_width * self.squares_tall + self.display_buffer)
 
-        self.obstacles = [self.add_apple(3,3)]
+        self.consumables = [self.add_apple(3,3)]
 
         checker_coords = (0, self.display_buffer)
         self.checkers = []
@@ -55,17 +56,32 @@ class board(object):
         if not self.is_snek_within_boundaries():
             self.snek.kill()
 
-        for obstacle in self.obstacles:
-            obstacle.draw(win)
+        for consumable in self.consumables:
+            consumable.draw(win)
         
         if self.is_snek_aligned():
             # print('hi')
             self.snek.switch_direction()
             self.snek.update_segments(self.get_pixel_of_square, self.get_square_of_pixel)
+            # check if it is on top of an apple
+            if self.snek_on_apple():
+                self.consumables.remove(self.snek_on_apple())
+                self.consumables.append(self.add_apple())
+                self.snek.increase_length()
         self.snek.draw(win)
 
-    def add_apple(self, x_index, y_index):
+    def add_apple(self, x_index=None, y_index=None):
+        if x_index is None:
+            x_index = r.randint(0,self.squares_wide)
+        if y_index is None:
+            y_index = r.randint(0,self.squares_tall)
         return apple(self.get_pixel_of_square(x_index, y_index)[0], self.get_pixel_of_square(x_index, y_index)[1], x_index, y_index, self.square_width)
+
+    def snek_on_apple(self):
+        for consumable in self.consumables:
+            if self.snek.get_head_index() == (consumable.x_index, consumable.y_index):
+                return consumable
+        return False
 
     def is_aligned_to_grid(self, x, y):
         return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0
@@ -97,9 +113,24 @@ class snek(object):
 
     def get_head_pixel(self):
         return self.segments[0].x_pixel, self.segments[0].y_pixel
+    def get_head_index(self):
+        return self.segments[0].x_index, self.segments[0].y_index
 
     def set_direction(self, direction):
         self.next_direction = direction
+
+    def increase_length(self):
+        prev_tail = self.segments[-1]
+        x_change, y_change = 0, 0
+        if prev_tail.direction == "right":
+            x_change = -1
+        elif prev_tail.direction == "left":
+            x_change = 1
+        elif prev_tail.direction == "up":
+            y_change = 1
+        elif prev_tail.direction == "down":
+            y_change = -1
+        self.segments.append(segment(prev_tail.x_index + x_change, prev_tail.y_index + y_change, prev_tail.x_index + x_change * self.vel, prev_tail.y_index + y_change * self.vel, self.segment_width, prev_tail.direction))
 
     def move_segments(self):
         # move the first one
@@ -118,16 +149,6 @@ class snek(object):
 
     def draw(self, win):
         if self.alive:
-            #TODO: make the board call the and update
-            # if is_aligned(self.segments[0].x_pixel, self.segments[0].y_pixel):
-            #     self.switch_direction()
-            #     self.update_segments(self.segments[0].x_pixel, self.segments[0].y_pixel, get_pixel_of_square, get_square_of_pixel)
-
-
-            # if not is_within_boundaries(self.segments[0].x_pixel, self.segments[0].y_pixel):
-            #     self.alive = False
-            # else:
-                # we do not want to draw the last one
             for segment in self.segments:
                 self.move_segments()
                 segment.draw(win)

@@ -8,8 +8,6 @@ pygame.init()
 
 # initialize the board
 board = board(25, 24, 24, 50)
-#TODO: get rid of this since it is an instance variable
-# snek = snek(board.checker_coords[0], board.checker_coords[1], board.square_width)
 
 
 # set window dimensions
@@ -47,9 +45,7 @@ while run:
 
 
     # draw the board
-    # if snek.is_aligned()
     board.draw(win)
-    # snek.draw(win, board.is_aligned_to_grid, board.is_within_boundaries, board.get_pixel_of_square, board.get_square_of_pixel)
 
     # refresh the window
     pygame.display.update()
