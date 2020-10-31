@@ -60,7 +60,6 @@ class board(object):
             consumable.draw(win)
         
         if self.is_snek_aligned():
-            # print('hi')
             self.snek.switch_direction()
             self.snek.update_segments(self.get_pixel_of_square, self.get_square_of_pixel)
             # check if it is on top of an apple
@@ -119,6 +118,7 @@ class snek(object):
     def set_direction(self, direction):
         self.next_direction = direction
 
+    #TODO: #3 When length is increased, the snek gets faster. Could it be the use of * self.vel in Line 133?
     def increase_length(self):
         prev_tail = self.segments[-1]
         x_change, y_change = 0, 0
@@ -132,6 +132,7 @@ class snek(object):
             y_change = -1
         self.segments.append(segment(prev_tail.x_index + x_change, prev_tail.y_index + y_change, prev_tail.x_index + x_change * self.vel, prev_tail.y_index + y_change * self.vel, self.segment_width, prev_tail.direction))
 
+    #TODO: #2 The second bit seems to lag behind the first bit, is it just too fast or is it gapped? what is happening?
     def move_segments(self):
         # move the first one
         self.segments[0].move(self.vel)
@@ -139,6 +140,7 @@ class snek(object):
         if len(self.segments) > 1:
             self.segments[-1].move(self.vel)
 
+    #TODO: #1 update segments in snek class does not update direction, find a way to add that
     def update_segments(self, get_pixel_of_square, get_square_of_pixel):
         new_x_index, new_y_index = get_square_of_pixel(self.get_head_pixel()[0], self.get_head_pixel()[1])
         for segment in self.segments:
