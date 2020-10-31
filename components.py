@@ -1,5 +1,5 @@
-import pygame
 import random as r
+import pygame
 
 class checker_square(object):
     def __init__(self, coords, size):
@@ -162,7 +162,7 @@ class segment(object):
         self.x_index = x_index
         self.y_index = y_index
         self.size = size
-        self.direction = "right"
+        self.direction = direction
 
     def set_direction(self, direction):
         self.direction = direction
