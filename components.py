@@ -21,6 +21,8 @@ class board(object):
 
         self.dimensions = (self.square_width * self.squares_wide, self.square_width * self.squares_tall + self.display_buffer)
 
+        self.obstacles = [self.add_apple(3,3)]
+
         self.checker_coords = (0, self.display_buffer)
         self.checkers = []
         for x_coord in range(0, self.squares_wide * self.square_width, 2 * self.square_width):
@@ -47,6 +49,12 @@ class board(object):
 
         for checker in self.checkers:
             checker.draw(win)
+        
+        for obstacle in self.obstacles:
+            obstacle.draw(win)
+
+    def add_apple(self, x_index, y_index):
+        return apple(self.get_pixel_of_square(x_index, y_index)[0], self.get_pixel_of_square(x_index, y_index)[1], x_index, y_index, self.square_width)
 
     def is_aligned_to_grid(self, x, y):
         return x % self.square_width == 0 and (y - self.display_buffer) % self.square_width == 0
@@ -132,3 +140,14 @@ class segment(object):
 
     def draw(self, win):
         pygame.draw.rect(win, (0, 255, 0), (self.x_pixel, self.y_pixel, self.size, self.size))
+
+class apple(object):
+    def __init__(self, x_pixel, y_pixel, x_index, y_index, size):
+        self.x_pixel = x_pixel
+        self.y_pixel = y_pixel
+        self.x_index = x_index
+        self.y_index = y_index
+        self.size = size
+    
+    def draw(self, win):
+        pygame.draw.ellipse(win, (255, 0, 0), pygame.Rect(self.x_pixel, self.y_pixel, self.size, self.size))
